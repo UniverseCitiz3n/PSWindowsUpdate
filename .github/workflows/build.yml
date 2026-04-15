@@ -145,7 +145,14 @@ jobs:
             Copy-Item -Path $sourcePath -Destination $packageDir -Force
           }
 
-          $zipPath = Join-Path $env:GITHUB_WORKSPACE "PSWindowsUpdate-package.zip"
+          if ($env:GITHUB_REF -like "refs/tags/v*") {
+            $zipName = "PSWindowsUpdate-$env:GITHUB_REF_NAME.zip"
+          }
+          else {
+            $zipName = "PSWindowsUpdate-package.zip"
+          }
+
+          $zipPath = Join-Path $env:GITHUB_WORKSPACE $zipName
           if (Test-Path $zipPath) {
             Remove-Item $zipPath -Force
           }
@@ -160,7 +167,7 @@ jobs:
           path: package\*
 
       - name: Create GitHub release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: ${{ env.PACKAGE_ZIP_PATH }}
