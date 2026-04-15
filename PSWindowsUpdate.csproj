@@ -96,6 +96,7 @@
     <Compile Include="src\ValidateRecurseCycleAttribute.cs" />
     <Compile Include="src\ValidateTestAttribute.cs" />
     <Compile Include="src\ValidateIntGt0Attribute.cs" />
+    <Compile Include="src\WUUpdateInstaller4.cs" />
     <Compile Include="src\WUTools.cs" />
     <Compile Include="src\RemoveWindowsUpdate.cs" />
     <Compile Include="src\RemoveWUServiceManager.cs" />

@@ -77,12 +77,15 @@ namespace PSWindowsUpdate
 
         /// <summary>Run reboot.</summary>
         /// <param name="Computer">Computer name</param>
-        public string RunReboot(string Computer)
+        /// <param name="timeout">Seconds before reboot (default: 5)</param>
+        public string RunReboot(string Computer, int timeout = 5)
         {
             var startInfo = new ProcessStartInfo();
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.FileName = "cmd";
-            startInfo.Arguments = !IsLocalHost(Computer) ? "/C shutdown -m " + Computer + " -f -r -t 5" : "/C shutdown -f -r -t 5";
+            startInfo.Arguments = !IsLocalHost(Computer)
+                ? "/C shutdown -m " + Computer + " -f -r -t " + timeout
+                : "/C shutdown -f -r -t " + timeout;
             var str = startInfo.FileName + " " + startInfo.Arguments;
             Process.Start(startInfo);
             return str;

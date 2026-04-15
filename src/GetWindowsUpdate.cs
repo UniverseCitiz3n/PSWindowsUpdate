@@ -310,6 +310,13 @@ namespace PSWindowsUpdate
         public SwitchParameter AutoReboot { get; set; }
 
         /// <summary>
+        /// <para type="description">Seconds to wait before rebooting. Applies to all reboot paths (AutoReboot and interactive). Allowed values: 30, 60, 120, 300, 600, 900 (up to 15 minutes). Default is 30.</para>
+        /// </summary>
+        [Parameter]
+        [ValidateSet("30", "60", "120", "300", "600", "900")]
+        public int RebootTimeout { get; set; } = 30;
+
+        /// <summary>
         /// <para type="description">Do not ask for reboot if it needed, but do not reboot automaticaly.</para>
         /// </summary>
         [Parameter]
@@ -1659,6 +1666,7 @@ namespace PSWindowsUpdate
                                         else if (AutoReboot)
                                         {
                                             cmdLine += " -AutoReboot";
+                                            cmdLine = cmdLine + " -RebootTimeout " + RebootTimeout;
                                         }
                                         else if (ScheduleReboot != DateTime.MinValue)
                                         {
@@ -1921,6 +1929,30 @@ namespace PSWindowsUpdate
                                             WriteDebug(DateTime.Now + " Reboot is required");
                                         }
 
+                                        if (installationResult.ResultCode == OperationResultCode.orcSucceeded)
+                                        {
+                                            try
+                                            {
+                                                var installer4 = updateInstaller as IWUUpdateInstaller4;
+                                                if (installer4 != null)
+                                                {
+                                                    int hr = installer4.Commit(0);
+                                                    if (hr == 0)
+                                                    {
+                                                        WriteDebug(DateTime.Now + " Feature update staging committed");
+                                                    }
+                                                    else
+                                                    {
+                                                        WriteDebug(DateTime.Now + " Failed to commit feature update staging: HRESULT 0x" + hr.ToString("X8"));
+                                                    }
+                                                }
+                                            }
+                                            catch (COMException ex)
+                                            {
+                                                WriteDebug(DateTime.Now + " Failed to commit feature update staging: " + ex.Message);
+                                            }
+                                        }
+
                                         var installMsg = "";
                                         switch (installationResult.ResultCode)
                                         {
@@ -2161,6 +2193,7 @@ namespace PSWindowsUpdate
                                         else if (AutoReboot)
                                         {
                                             cmdLine3 += " -AutoReboot";
+                                            cmdLine3 = cmdLine3 + " -RebootTimeout " + RebootTimeout;
                                         }
                                         else if (ScheduleReboot != DateTime.MinValue)
                                         {
@@ -2393,7 +2426,7 @@ namespace PSWindowsUpdate
                 else if (AutoReboot)
                 {
                     WriteDebug(DateTime.Now + " Auto Reboot");
-                    WriteVerbose(WUToolsObj.RunReboot("localhost"));
+                    WriteVerbose(WUToolsObj.RunReboot("localhost", RebootTimeout));
                 }
                 else if (IgnoreReboot)
                 {
@@ -2406,7 +2439,7 @@ namespace PSWindowsUpdate
                     if (Console.ReadLine().ToUpper() == "Y")
                     {
                         WriteDebug(DateTime.Now + " Manually Reboot");
-                        WriteVerbose(WUToolsObj.RunReboot("localhost"));
+                        WriteVerbose(WUToolsObj.RunReboot("localhost", RebootTimeout));
                     }
                 }
             }
