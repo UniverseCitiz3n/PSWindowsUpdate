@@ -71,7 +71,7 @@ jobs:
           $cl = (Get-Command cl.exe -ErrorAction Stop).Source
 
           Push-Location $idlDir
-          & $midl /cpp_cmd "$cl" /I $shareDir /out $tempDir bits4_0.idl `
+          & $midl /cpp_cmd "`"$cl`"" /I $shareDir /out $tempDir bits4_0.idl `
                   /dlldata NUL /header NUL /iid NUL /proxy NUL
           if ($LASTEXITCODE -ne 0) { throw "MIDL failed with exit code $LASTEXITCODE" }
           Pop-Location
