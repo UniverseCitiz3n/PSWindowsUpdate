@@ -1,0 +1,90 @@
+name: Build PSWindowsUpdate
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Generate BITSReference4_0.dll
+        shell: powershell
+        run: |
+          # Locate the latest Windows 10 SDK
+          $sdkBase = "C:\Program Files (x86)\Windows Kits\10"
+          if (-not (Test-Path "$sdkBase\Include")) {
+            throw "Windows 10 SDK not found at $sdkBase"
+          }
+          $sdkVersion = (Get-Item "$sdkBase\Include\*" |
+                         Sort-Object Name -Descending |
+                         Select-Object -First 1).Name
+          if ([string]::IsNullOrEmpty($sdkVersion)) {
+            throw "No Windows SDK version directory found under $sdkBase\Include"
+          }
+          Write-Host "Windows SDK version: $sdkVersion"
+
+          $tempDir = "$env:TEMP\BITSTEMPDIR"
+          New-Item -ItemType Directory -Force -Path $tempDir | Out-Null
+
+          # Run MIDL to produce the bits4_0.tlb type library.
+          # GitHub-hosted Windows runners are always x64.
+          $midl     = "$sdkBase\bin\$sdkVersion\x64\midl.exe"
+          $idlDir   = "$sdkBase\Include\$sdkVersion\um"
+          $shareDir = "$sdkBase\Include\$sdkVersion\shared"
+
+          Push-Location $idlDir
+          & $midl /I $shareDir /out $tempDir bits4_0.idl `
+                  /dlldata NUL /header NUL /iid NUL /proxy NUL
+          if ($LASTEXITCODE -ne 0) { throw "MIDL failed with exit code $LASTEXITCODE" }
+          Pop-Location
+
+          # Locate tlbimp.exe from the .NET Framework SDK tools directory,
+          # which is a well-known path and faster than a full VS tree search.
+          $tlbimp = Get-ChildItem `
+                      -Path "${env:ProgramFiles(x86)}\Microsoft SDKs\Windows" `
+                      -Filter "tlbimp.exe" -Recurse -ErrorAction SilentlyContinue |
+                    Where-Object { $_.FullName -match "NETFX" -and
+                                   $_.FullName -notmatch "\\arm" } |
+                    Sort-Object { $_.FullName } -Descending |
+                    Select-Object -First 1
+
+          if (-not $tlbimp) {
+            throw "tlbimp.exe not found under ${env:ProgramFiles(x86)}\Microsoft SDKs\Windows"
+          }
+          Write-Host "Using tlbimp: $($tlbimp.FullName)"
+
+          # Convert the TLB to a .NET interop assembly
+          & $tlbimp.FullName "$tempDir\bits4_0.tlb" /out:"$tempDir\BITSReference4_0.dll"
+          if ($LASTEXITCODE -ne 0) { throw "TLBIMP failed with exit code $LASTEXITCODE" }
+
+          # Copy next to the project so MSBuild's ResolveAssemblyReference can find it
+          Copy-Item "$tempDir\BITSReference4_0.dll" "$env:GITHUB_WORKSPACE\" -Force
+          Write-Host "BITSReference4_0.dll written to $env:GITHUB_WORKSPACE"
+
+      - name: Restore NuGet packages
+        run: msbuild PSWindowsUpdate.sln /t:Restore /p:Configuration=Release
+
+      - name: Build (Release)
+        run: >
+          msbuild PSWindowsUpdate.sln
+          /p:Configuration=Release
+          /p:Platform="Any CPU"
+          /m
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: PSWindowsUpdate
+          path: bin\Release\
