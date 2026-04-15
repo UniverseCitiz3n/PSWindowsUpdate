@@ -32,7 +32,11 @@ jobs:
           cmd /c "`"$devCmd`" -arch=x64 -host_arch=x64 && set" |
             ForEach-Object {
               if ($_ -match "^(.*?)=(.*)$") {
-                [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process")
+                $name  = $Matches[1]
+                $value = $Matches[2]
+                [System.Environment]::SetEnvironmentVariable($name, $value, "Process")
+                # Persist to subsequent steps via GITHUB_ENV
+                Add-Content -Path $env:GITHUB_ENV -Value "$name=$value"
               }
             }
 
