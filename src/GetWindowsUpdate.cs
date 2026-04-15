@@ -310,6 +310,13 @@ namespace PSWindowsUpdate
         public SwitchParameter AutoReboot { get; set; }
 
         /// <summary>
+        /// <para type="description">Seconds to wait before rebooting when AutoReboot is used. Allowed values: 30, 60, 120, 300, 600, 900 (up to 15 minutes). Default is 30.</para>
+        /// </summary>
+        [Parameter]
+        [ValidateSet("30", "60", "120", "300", "600", "900")]
+        public int RebootTimeout { get; set; } = 30;
+
+        /// <summary>
         /// <para type="description">Do not ask for reboot if it needed, but do not reboot automaticaly.</para>
         /// </summary>
         [Parameter]
@@ -1659,6 +1666,7 @@ namespace PSWindowsUpdate
                                         else if (AutoReboot)
                                         {
                                             cmdLine += " -AutoReboot";
+                                            cmdLine = cmdLine + " -RebootTimeout " + RebootTimeout;
                                         }
                                         else if (ScheduleReboot != DateTime.MinValue)
                                         {
@@ -2179,6 +2187,7 @@ namespace PSWindowsUpdate
                                         else if (AutoReboot)
                                         {
                                             cmdLine3 += " -AutoReboot";
+                                            cmdLine3 = cmdLine3 + " -RebootTimeout " + RebootTimeout;
                                         }
                                         else if (ScheduleReboot != DateTime.MinValue)
                                         {
