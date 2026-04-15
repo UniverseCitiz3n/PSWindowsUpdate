@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>PSWindowsUpdate</id>
+    <version>2.2.1.5</version>
+    <title>PSWindowsUpdate</title>
+    <authors>Michal Gajda</authors>
+    <owners>Michal Gajda</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This module contain cmdlets to manage Windows Update Client.</description>
+    <projectUrl>https://github.com/sarog/PSWindowsUpdate</projectUrl>
+    <licenseUrl>https://github.com/sarog/PSWindowsUpdate/blob/master/LICENSE</licenseUrl>
+    <tags>powershell windows update</tags>
+  </metadata>
+  <files>
+    <file src="PSWindowsUpdate.nuspec" target="" />
+    <file src="PSWindowsUpdate.psm1" target="" />
+    <file src="PSWUSettings.xml.tmp" target="" />
+    <file src="bin\Release\PSWindowsUpdate.dll" target="" />
+    <file src="PSWindowsUpdate.dll-Help.xml" target="" />
+    <file src="PSWindowsUpdate.Format.ps1xml" target="" />
+    <file src="PSWindowsUpdate.psd1" target="" />
+  </files>
+</package>

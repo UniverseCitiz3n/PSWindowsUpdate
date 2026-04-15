@@ -3,6 +3,7 @@ name: Build PSWindowsUpdate
 on:
   push:
     branches: [ master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ master ]
 
@@ -10,7 +11,7 @@ jobs:
   build:
     runs-on: windows-latest
     permissions:
-      contents: read
+      contents: write
 
     steps:
       - name: Checkout
@@ -119,8 +120,48 @@ jobs:
           /p:Platform="Any CPU"
           /m
 
+      - name: Prepare release package
+        shell: powershell
+        run: |
+          $packageDir = Join-Path $env:GITHUB_WORKSPACE "package"
+          New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
+
+          $requiredFiles = @(
+            "PSWindowsUpdate.nuspec",
+            "PSWindowsUpdate.psm1",
+            "PSWUSettings.xml.tmp",
+            "bin\Release\PSWindowsUpdate.dll",
+            "PSWindowsUpdate.dll-Help.xml",
+            "PSWindowsUpdate.Format.ps1xml",
+            "PSWindowsUpdate.psd1"
+          )
+
+          foreach ($file in $requiredFiles) {
+            $sourcePath = Join-Path $env:GITHUB_WORKSPACE $file
+            if (-not (Test-Path $sourcePath)) {
+              throw "Missing required package file: $sourcePath"
+            }
+
+            Copy-Item -Path $sourcePath -Destination $packageDir -Force
+          }
+
+          $zipPath = Join-Path $env:GITHUB_WORKSPACE "PSWindowsUpdate-package.zip"
+          if (Test-Path $zipPath) {
+            Remove-Item $zipPath -Force
+          }
+
+          Compress-Archive -Path (Join-Path $packageDir "*") -DestinationPath $zipPath -Force
+          "PACKAGE_ZIP_PATH=$zipPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: package
-          path: bin\Release\PSWindowsUpdate.dll
+          path: package\*
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.PACKAGE_ZIP_PATH }}
+          generate_release_notes: true
