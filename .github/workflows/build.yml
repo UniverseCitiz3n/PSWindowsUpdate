@@ -3,6 +3,7 @@ name: Build PSWindowsUpdate
 on:
   push:
     branches: [ master ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ master ]
 
@@ -119,8 +120,77 @@ jobs:
           /p:Platform="Any CPU"
           /m
 
+      - name: Prepare release package
+        shell: powershell
+        run: |
+          $packageDir = Join-Path $env:GITHUB_WORKSPACE "package"
+          New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
+
+          $requiredFiles = @(
+            "PSWindowsUpdate.nuspec",
+            "PSWindowsUpdate.psm1",
+            "PSWUSettings.xml.tmp",
+            "bin\Release\PSWindowsUpdate.dll",
+            "PSWindowsUpdate.dll-Help.xml",
+            "PSWindowsUpdate.Format.ps1xml",
+            "PSWindowsUpdate.psd1"
+          )
+
+          foreach ($file in $requiredFiles) {
+            $sourcePath = Join-Path $env:GITHUB_WORKSPACE $file
+            if (-not (Test-Path $sourcePath)) {
+              throw "Missing required package file: $sourcePath"
+            }
+
+            $destPath = Join-Path $packageDir $file
+            $destParent = Split-Path $destPath -Parent
+            New-Item -ItemType Directory -Force -Path $destParent | Out-Null
+            if (-not (Test-Path $destParent)) {
+              throw "Failed to create package destination directory: $destParent"
+            }
+            Copy-Item -Path $sourcePath -Destination $destPath -Force
+          }
+
+          if ($env:GITHUB_REF -like "refs/tags/v*") {
+            $zipName = "PSWindowsUpdate-$env:GITHUB_REF_NAME.zip"
+            $zipPath = Join-Path $env:GITHUB_WORKSPACE $zipName
+
+            if (Test-Path $zipPath) {
+              Remove-Item $zipPath -Force
+            }
+
+            Compress-Archive -Path "$packageDir\*" -DestinationPath $zipPath -Force
+            "PACKAGE_ZIP_PATH=$zipPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+          }
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: package
-          path: bin\Release\PSWindowsUpdate.dll
+          path: package
+
+      - name: Upload release ZIP
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-zip
+          path: ${{ env.PACKAGE_ZIP_PATH }}
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release ZIP
+        uses: actions/download-artifact@v4
+        with:
+          name: release-zip
+          path: release-assets
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-assets/*.zip
+          generate_release_notes: true
