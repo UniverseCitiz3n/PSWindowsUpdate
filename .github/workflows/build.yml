@@ -19,6 +19,26 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Initialize MSVC build tools
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          if (-not $vsPath) { throw "Visual Studio with VC tools not found" }
+
+          $devCmd = Join-Path $vsPath "Common7\Tools\VsDevCmd.bat"
+          if (-not (Test-Path $devCmd)) { throw "VsDevCmd.bat not found: $devCmd" }
+
+          cmd /c "`"$devCmd`" -arch=x64 -host_arch=x64 && set" |
+            ForEach-Object {
+              if ($_ -match "^(.*?)=(.*)$") {
+                [System.Environment]::SetEnvironmentVariable($matches[1], $matches[2], "Process")
+              }
+            }
+
+          where.exe cl
+          where.exe midl
+
       - name: Generate BITSReference4_0.dll
         shell: powershell
         run: |
@@ -44,8 +64,10 @@ jobs:
           $idlDir   = "$sdkBase\Include\$sdkVersion\um"
           $shareDir = "$sdkBase\Include\$sdkVersion\shared"
 
+          $cl = (Get-Command cl.exe -ErrorAction Stop).Source
+
           Push-Location $idlDir
-          & $midl /I $shareDir /out $tempDir bits4_0.idl `
+          & $midl /cpp_cmd "$cl" /I $shareDir /out $tempDir bits4_0.idl `
                   /dlldata NUL /header NUL /iid NUL /proxy NUL
           if ($LASTEXITCODE -ne 0) { throw "MIDL failed with exit code $LASTEXITCODE" }
           Pop-Location
