@@ -308,6 +308,13 @@ namespace PSWindowsUpdate
         public SwitchParameter AutoReboot { get; set; }
 
         /// <summary>
+        /// <para type="description">Seconds to wait before rebooting when AutoReboot is used. Allowed values: 30, 60, 120, 300, 600, 900 (up to 15 minutes). Default is 30.</para>
+        /// </summary>
+        [Parameter]
+        [ValidateSet("30", "60", "120", "300", "600", "900")]
+        public int RebootTimeout { get; set; } = 30;
+
+        /// <summary>
         /// <para type="description">Do not ask for reboot if it needed, but do not reboot automaticaly.</para>
         /// </summary>
         [Parameter]
@@ -1184,12 +1191,11 @@ namespace PSWindowsUpdate
                                     WriteDebug(DateTime.Now + " Reboot is required");
                                 }
 
-                                if (installationResult.ResultCode == OperationResultCode.orcSucceeded &&
-                                    installationResult.RebootRequired)
+                                if (installationResult.ResultCode == OperationResultCode.orcSucceeded)
                                 {
                                     try
                                     {
-                                        var installer4 = updateInstaller as IUpdateInstaller4;
+                                        var installer4 = updateInstaller as IWUUpdateInstaller4;
                                         if (installer4 != null)
                                         {
                                             installer4.Commit(0);
@@ -1425,7 +1431,7 @@ namespace PSWindowsUpdate
                 else if (AutoReboot)
                 {
                     WriteDebug(DateTime.Now + " Auto Reboot");
-                    WriteVerbose(WUToolsObj.RunReboot("localhost"));
+                    WriteVerbose(WUToolsObj.RunReboot("localhost", RebootTimeout));
                 }
                 else if (IgnoreReboot)
                 {
@@ -1438,7 +1444,7 @@ namespace PSWindowsUpdate
                     if (Console.ReadLine().ToUpper() == "Y")
                     {
                         WriteDebug(DateTime.Now + " Manually Reboot");
-                        WriteVerbose(WUToolsObj.RunReboot("localhost"));
+                        WriteVerbose(WUToolsObj.RunReboot("localhost", RebootTimeout));
                     }
                 }
             }
