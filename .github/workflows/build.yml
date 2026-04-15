@@ -97,8 +97,17 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "TLBIMP failed with exit code $LASTEXITCODE" }
 
           # Copy next to the project so MSBuild's ResolveAssemblyReference can find it
-          Copy-Item "$tempDir\BITSReference4_0.dll" "$env:GITHUB_WORKSPACE\" -Force
-          Write-Host "BITSReference4_0.dll written to $env:GITHUB_WORKSPACE"
+          $projectPath = Join-Path $env:GITHUB_WORKSPACE "PSWindowsUpdate.csproj"
+          if (-not (Test-Path $projectPath)) { throw "Project file not found at $projectPath" }
+
+          $projectDir = Split-Path -Parent $projectPath
+          $dllTargetDir = Join-Path $projectDir "lib"
+          New-Item -ItemType Directory -Force -Path $dllTargetDir | Out-Null
+
+          $targetPath = Join-Path $dllTargetDir "BITSReference4_0.dll"
+          Copy-Item "$tempDir\BITSReference4_0.dll" $targetPath -Force
+          Test-Path $targetPath | Out-Host
+          Write-Host "BITSReference4_0.dll written to $targetPath"
 
       - name: Restore NuGet packages
         run: msbuild PSWindowsUpdate.sln /t:Restore /p:Configuration=Release
