@@ -4,12 +4,12 @@
     <id>PSWindowsUpdate</id>
     <version>2.2.1.5</version>
     <title>PSWindowsUpdate</title>
-    <authors>Michal Gajda</authors>
-    <owners>Michal Gajda</owners>
+    <authors>Michal Gajda, UniverseCitiz3n</authors>
+    <owners>Michal Gajda, UniverseCitiz3n</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>This module contain cmdlets to manage Windows Update Client.</description>
-    <projectUrl>https://github.com/sarog/PSWindowsUpdate</projectUrl>
-    <licenseUrl>https://github.com/sarog/PSWindowsUpdate/blob/master/LICENSE</licenseUrl>
+    <description>This module contains cmdlets to manage Windows Update Client.</description>
+    <projectUrl>https://github.com/UniverseCitiz3n/PSWindowsUpdate</projectUrl>
+    <licenseUrl>https://github.com/UniverseCitiz3n/PSWindowsUpdate/blob/master/LICENSE</licenseUrl>
     <tags>powershell windows update</tags>
   </metadata>
   <files>
