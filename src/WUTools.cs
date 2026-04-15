@@ -82,7 +82,7 @@ namespace PSWindowsUpdate
             var startInfo = new ProcessStartInfo();
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
             startInfo.FileName = "cmd";
-            startInfo.Arguments = !IsLocalHost(Computer) ? "/C shutdown -m " + Computer + " -f -r -t 5" : "/C shutdown -f -r -t 5";
+            startInfo.Arguments = !IsLocalHost(Computer) ? "/C shutdown -m " + Computer + " -r -t 30" : "/C shutdown -r -t 30";
             var str = startInfo.FileName + " " + startInfo.Arguments;
             Process.Start(startInfo);
             return str;

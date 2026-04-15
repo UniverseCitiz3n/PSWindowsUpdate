@@ -1184,6 +1184,24 @@ namespace PSWindowsUpdate
                                     WriteDebug(DateTime.Now + " Reboot is required");
                                 }
 
+                                if (installationResult.ResultCode == OperationResultCode.orcSucceeded &&
+                                    installationResult.RebootRequired)
+                                {
+                                    try
+                                    {
+                                        var installer4 = updateInstaller as IUpdateInstaller4;
+                                        if (installer4 != null)
+                                        {
+                                            installer4.Commit(0);
+                                            WriteDebug(DateTime.Now + " Feature update staging committed");
+                                        }
+                                    }
+                                    catch (COMException ex)
+                                    {
+                                        WriteDebug(DateTime.Now + " Failed to commit feature update staging: " + ex.Message);
+                                    }
+                                }
+
                                 var installResult = "";
                                 switch (installationResult.ResultCode)
                                 {
