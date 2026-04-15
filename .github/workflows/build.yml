@@ -143,7 +143,11 @@ jobs:
             }
 
             $destPath = Join-Path $packageDir $file
-            New-Item -ItemType Directory -Force -Path (Split-Path $destPath -Parent) | Out-Null
+            $destParent = Split-Path $destPath -Parent
+            New-Item -ItemType Directory -Force -Path $destParent | Out-Null
+            if (-not (Test-Path $destParent)) {
+              throw "Failed to create package destination directory: $destParent"
+            }
             Copy-Item -Path $sourcePath -Destination $destPath -Force
           }
 
@@ -155,7 +159,7 @@ jobs:
               Remove-Item $zipPath -Force
             }
 
-            Compress-Archive -Path (Join-Path $packageDir "*") -DestinationPath $zipPath -Force
+            Compress-Archive -Path "$packageDir\*" -DestinationPath $zipPath -Force
             "PACKAGE_ZIP_PATH=$zipPath" | Out-File -FilePath $env:GITHUB_ENV -Append
           }
 
