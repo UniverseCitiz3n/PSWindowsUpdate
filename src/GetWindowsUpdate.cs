@@ -310,7 +310,7 @@ namespace PSWindowsUpdate
         public SwitchParameter AutoReboot { get; set; }
 
         /// <summary>
-        /// <para type="description">Seconds to wait before rebooting when AutoReboot is used. Allowed values: 30, 60, 120, 300, 600, 900 (up to 15 minutes). Default is 30.</para>
+        /// <para type="description">Seconds to wait before rebooting. Applies to all reboot paths (AutoReboot and interactive). Allowed values: 30, 60, 120, 300, 600, 900 (up to 15 minutes). Default is 30.</para>
         /// </summary>
         [Parameter]
         [ValidateSet("30", "60", "120", "300", "600", "900")]
@@ -1936,8 +1936,15 @@ namespace PSWindowsUpdate
                                                 var installer4 = updateInstaller as IWUUpdateInstaller4;
                                                 if (installer4 != null)
                                                 {
-                                                    installer4.Commit(0);
-                                                    WriteDebug(DateTime.Now + " Feature update staging committed");
+                                                    int hr = installer4.Commit(0);
+                                                    if (hr == 0)
+                                                    {
+                                                        WriteDebug(DateTime.Now + " Feature update staging committed");
+                                                    }
+                                                    else
+                                                    {
+                                                        WriteDebug(DateTime.Now + " Failed to commit feature update staging: HRESULT 0x" + hr.ToString("X8"));
+                                                    }
                                                 }
                                             }
                                             catch (COMException ex)

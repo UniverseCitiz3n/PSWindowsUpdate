@@ -77,8 +77,8 @@ namespace PSWindowsUpdate
 
         /// <summary>Run reboot.</summary>
         /// <param name="Computer">Computer name</param>
-        /// <param name="timeout">Seconds before reboot (default: 30)</param>
-        public string RunReboot(string Computer, int timeout = 30)
+        /// <param name="timeout">Seconds before reboot (default: 5)</param>
+        public string RunReboot(string Computer, int timeout = 5)
         {
             var startInfo = new ProcessStartInfo();
             startInfo.WindowStyle = ProcessWindowStyle.Hidden;
