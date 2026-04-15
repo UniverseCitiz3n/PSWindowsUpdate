@@ -45,7 +45,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BITSReference4_0" />
+    <Reference Include="BITSReference4_0">
+      <HintPath>lib\BITSReference4_0.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Management.Infrastructure" />
     <Reference Include="System" />
