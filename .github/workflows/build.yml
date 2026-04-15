@@ -68,10 +68,11 @@ jobs:
           $idlDir   = "$sdkBase\Include\$sdkVersion\um"
           $shareDir = "$sdkBase\Include\$sdkVersion\shared"
 
-          $cl = (Get-Command cl.exe -ErrorAction Stop).Source
+          # Use cl.exe from the VS DevCmd PATH to avoid space issues with the full path.
+          $null = Get-Command cl.exe -ErrorAction Stop
 
           Push-Location $idlDir
-          & $midl /cpp_cmd "`"$cl`"" /I $shareDir /out $tempDir bits4_0.idl `
+          & $midl /cpp_cmd cl.exe /I $shareDir /out $tempDir bits4_0.idl `
                   /dlldata NUL /header NUL /iid NUL /proxy NUL
           if ($LASTEXITCODE -ne 0) { throw "MIDL failed with exit code $LASTEXITCODE" }
           Pop-Location
