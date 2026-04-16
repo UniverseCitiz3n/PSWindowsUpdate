@@ -127,22 +127,22 @@ jobs:
           New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
 
           $requiredFiles = @(
-            "PSWindowsUpdate.nuspec",
-            "PSWindowsUpdate.psm1",
-            "PSWUSettings.xml.tmp",
-            "bin\Release\PSWindowsUpdate.dll",
-            "PSWindowsUpdate.dll-Help.xml",
-            "PSWindowsUpdate.Format.ps1xml",
-            "PSWindowsUpdate.psd1"
+            @{ Source = "PSWindowsUpdate.nuspec"; Dest = "PSWindowsUpdate.nuspec" },
+            @{ Source = "PSWindowsUpdate.psm1"; Dest = "PSWindowsUpdate.psm1" },
+            @{ Source = "PSWUSettings.xml.tmp"; Dest = "PSWUSettings.xml.tmp" },
+            @{ Source = "bin\Release\PSWindowsUpdate.dll"; Dest = "PSWindowsUpdate.dll" },
+            @{ Source = "PSWindowsUpdate.dll-Help.xml"; Dest = "PSWindowsUpdate.dll-Help.xml" },
+            @{ Source = "PSWindowsUpdate.Format.ps1xml"; Dest = "PSWindowsUpdate.Format.ps1xml" },
+            @{ Source = "PSWindowsUpdate.psd1"; Dest = "PSWindowsUpdate.psd1" }
           )
 
           foreach ($file in $requiredFiles) {
-            $sourcePath = Join-Path $env:GITHUB_WORKSPACE $file
+            $sourcePath = Join-Path $env:GITHUB_WORKSPACE $file.Source
             if (-not (Test-Path $sourcePath)) {
               throw "Missing required package file: $sourcePath"
             }
 
-            $destPath = Join-Path $packageDir $file
+            $destPath = Join-Path $packageDir $file.Dest
             $destParent = Split-Path $destPath -Parent
             New-Item -ItemType Directory -Force -Path $destParent | Out-Null
             if (-not (Test-Path $destParent)) {
