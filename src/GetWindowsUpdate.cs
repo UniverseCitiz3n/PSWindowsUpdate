@@ -1301,8 +1301,8 @@ namespace PSWindowsUpdate
                                     text20 = !update.IsBeta ? text20 + "-" : text20 + "B";
                                     var psObject = new PSObject(update);
                                     psObject.Properties.Add(new PSNoteProperty("Size", text11));
-                                    psObject.Properties.Add(new PSNoteProperty("MinDownloadSize", WUToolsObj.ConvertSize(update.MinDownloadSize)));
-                                    psObject.Properties.Add(new PSNoteProperty("MaxDownloadSize", WUToolsObj.ConvertSize(update.MaxDownloadSize)));
+                                    psObject.Properties.Add(new PSNoteProperty("MinDownloadSizeText", WUToolsObj.ConvertSize(update.MinDownloadSize)));
+                                    psObject.Properties.Add(new PSNoteProperty("MaxDownloadSizeText", WUToolsObj.ConvertSize(update.MaxDownloadSize)));
                                     psObject.Properties.Add(new PSNoteProperty("Status", text20));
                                     psObject.Properties.Add(new PSNoteProperty("ComputerName", target));
                                     psObject.Properties.Add(new PSNoteProperty("KB", text18));

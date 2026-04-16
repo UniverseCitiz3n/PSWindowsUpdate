@@ -695,7 +695,7 @@ Accept wildcard characters: False
 
 ### -MaxSize
 Post search criteria.
-Finds updates that have MaxDownloadSize less or equal.
+Finds updates that have MaxDownloadSize less than the specified value.
 Size is in Bytes.
 Note: this filter always compares against the raw MaxDownloadSize API value regardless of how the Size column is displayed.
 
@@ -728,7 +728,7 @@ Accept wildcard characters: False
 
 ### -MinSize
 Post search criteria.
-Finds updates that have MaxDownloadSize greater or equal.
+Finds updates that have MaxDownloadSize greater than the specified value.
 Size is in Bytes.
 Note: this filter always compares against the raw MaxDownloadSize API value regardless of how the Size column is displayed.
 
@@ -1119,8 +1119,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 Output objects include the following size-related properties:
 
 - **Size** – Human-readable expected download size for this machine. Uses the API's `MinDownloadSize` when available (greater than zero), otherwise falls back to `MaxDownloadSize`.
-- **MinDownloadSize** – Human-readable minimum possible download size (from the WUA `MinDownloadSize` API field). May be `0B` for fully-cached updates.
-- **MaxDownloadSize** – Human-readable maximum possible download size (from the WUA `MaxDownloadSize` API field). For UUP-style cumulative updates this can be very large (tens of GB) because it represents the upper bound across all possible package variants.
+- **MinDownloadSizeText** – Human-readable minimum possible download size (from the WUA `MinDownloadSize` API field). May be `0B` for fully-cached updates.
+- **MaxDownloadSizeText** – Human-readable maximum possible download size (from the WUA `MaxDownloadSize` API field). For UUP-style cumulative updates this can be very large (tens of GB) because it represents the upper bound across all possible package variants.
 
 The `-MaxSize` and `-MinSize` filter parameters always compare against the raw `MaxDownloadSize` API value.
 
