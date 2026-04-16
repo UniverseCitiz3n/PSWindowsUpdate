@@ -18,6 +18,12 @@
         /// <summary>Size</summary>
         public string Size { get; set; }
 
+        /// <summary>MinDownloadSize</summary>
+        public string MinDownloadSize { get; set; }
+
+        /// <summary>MaxDownloadSize</summary>
+        public string MaxDownloadSize { get; set; }
+
         /// <summary>Title</summary>
         public string Title { get; set; }
     }

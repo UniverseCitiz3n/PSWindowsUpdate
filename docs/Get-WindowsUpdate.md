@@ -697,6 +697,7 @@ Accept wildcard characters: False
 Post search criteria.
 Finds updates that have MaxDownloadSize less or equal.
 Size is in Bytes.
+Note: this filter always compares against the raw MaxDownloadSize API value regardless of how the Size column is displayed.
 
 ```yaml
 Type: Int64
@@ -729,6 +730,7 @@ Accept wildcard characters: False
 Post search criteria.
 Finds updates that have MaxDownloadSize greater or equal.
 Size is in Bytes.
+Note: this filter always compares against the raw MaxDownloadSize API value regardless of how the Size column is displayed.
 
 ```yaml
 Type: Int64
@@ -1113,6 +1115,14 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### PSWindowsUpdate.WindowsUpdate
+
+Output objects include the following size-related properties:
+
+- **Size** – Human-readable expected download size for this machine. Uses the API's `MinDownloadSize` when available (greater than zero), otherwise falls back to `MaxDownloadSize`.
+- **MinDownloadSize** – Human-readable minimum possible download size (from the WUA `MinDownloadSize` API field). May be `0B` for fully-cached updates.
+- **MaxDownloadSize** – Human-readable maximum possible download size (from the WUA `MaxDownloadSize` API field). For UUP-style cumulative updates this can be very large (tens of GB) because it represents the upper bound across all possible package variants.
+
+The `-MaxSize` and `-MinSize` filter parameters always compare against the raw `MaxDownloadSize` API value.
 
 ## NOTES
 
