@@ -1090,7 +1090,7 @@ namespace PSWindowsUpdate
                             foreach (IUpdate update in updateCollection)
                             {
                                 WriteDebug(DateTime.Now + " " + update.Title);
-                                var text11 = WUToolsObj.ConvertSize(update.MaxDownloadSize);
+                                var text11 = WUToolsObj.ConvertSize(update.MinDownloadSize > 0 ? update.MinDownloadSize : update.MaxDownloadSize);
                                 progressRecord.StatusDescription = "[" + num3 + "/" + count + "] " + update.Title + " " + text11;
                                 progressRecord.PercentComplete = num3 * 100 / count;
                                 WriteProgress(progressRecord);
@@ -1301,6 +1301,8 @@ namespace PSWindowsUpdate
                                     text20 = !update.IsBeta ? text20 + "-" : text20 + "B";
                                     var psObject = new PSObject(update);
                                     psObject.Properties.Add(new PSNoteProperty("Size", text11));
+                                    psObject.Properties.Add(new PSNoteProperty("MinDownloadSizeText", WUToolsObj.ConvertSize(update.MinDownloadSize)));
+                                    psObject.Properties.Add(new PSNoteProperty("MaxDownloadSizeText", WUToolsObj.ConvertSize(update.MaxDownloadSize)));
                                     psObject.Properties.Add(new PSNoteProperty("Status", text20));
                                     psObject.Properties.Add(new PSNoteProperty("ComputerName", target));
                                     psObject.Properties.Add(new PSNoteProperty("KB", text18));
